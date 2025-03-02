@@ -7,6 +7,40 @@ const ChunkConfigSchema = z.object({
   chunkOverlap: z.number().optional(),
 });
 
+// Ingest File
+// export const IngestFileSchema = z.object({
+//   namespaceId: NamespaceIdSchema.optional(),
+//   ingestConfig: z.object({
+//     source: z.literal("FILE"),
+//     config: z.object({
+//       file: z.instanceof(File),
+//       metadata: z.record(z.any()).optional(),
+//     }),
+//     chunkConfig: ChunkConfigSchema.optional(),
+//   }),
+//   tenantId: z.string().optional(),
+// });
+
+// export async function ingestFile(params: z.infer<typeof IngestFileSchema>) {
+//   const { namespaceId, tenantId, ingestConfig } = params;
+//   const formData = new FormData();
+//   formData.append("file", ingestConfig.config.file);
+//   formData.append("metadata", JSON.stringify(ingestConfig.config.metadata || {}));
+//   if (ingestConfig.chunkConfig) {
+//     formData.append("chunkConfig", JSON.stringify(ingestConfig.chunkConfig));
+//   }
+  
+//   return makeApiRequest({
+//     method: "POST",
+//     path: "/v1/ingest/file",
+//     tenantId,
+//     body: formData,
+//     queryParams: {
+//       namespaceId: getDefaultNamespaceId(namespaceId),
+//     },
+//   });
+// }
+
 // Ingest Text
 export const IngestTextSchema = z.object({
   namespaceId: NamespaceIdSchema.optional(),

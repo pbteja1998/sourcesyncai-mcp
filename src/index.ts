@@ -48,6 +48,8 @@ import {
   ingestBox,
   GetIngestJobRunStatusSchema,
   getIngestJobRunStatus,
+  // IngestFileSchema,
+  // ingestFile,
 } from "./ingestion.js";
 
 // Import documents module
@@ -335,6 +337,22 @@ server.tool(
     }
   }
 );
+
+// server.tool(
+//   "ingest_file",
+//   "Ingest a file into a SourceSync.ai namespace.",
+//   IngestFileSchema.shape,
+//   async (params) => {
+//     try {
+//       const result = await ingestFile(params);
+//       return {
+//         content: [{ type: "text", text: JSON.stringify(result) }]
+//       };
+//     } catch (error) {
+//       return handleToolError(error);
+//     }
+//   }
+// );
 
 server.tool(
   "get_ingest_job_run_status",
