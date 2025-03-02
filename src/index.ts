@@ -356,7 +356,7 @@ server.tool(
 
 server.tool(
   "get_ingest_job_run_status",
-  "Get the status of an ingestion job run. API key and namespace ID are optional if SOURCESYNC_DEFAULT_API_KEY and SOURCESYNC_DEFAULT_NAMESPACE_ID environment variables are set.",
+  "Get the status of an ingestion job run.",
   GetIngestJobRunStatusSchema.shape,
   async (params) => {
     try {
