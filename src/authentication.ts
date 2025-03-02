@@ -12,7 +12,7 @@ export async function validateApiKey(apiKey?: string): Promise<boolean> {
     await makeApiRequest({
       method: "GET",
       path: "/v1/namespaces",
-      apiKey,
+      apiKey, // The makeApiRequest function will use the default API key if this is undefined
     });
     return true;
   } catch (error) {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { makeApiRequest, ApiKeySchema, NamespaceIdSchema } from "./utils.js";
+import { makeApiRequest, ApiKeySchema, NamespaceIdSchema, getDefaultNamespaceId } from "./utils.js";
 
 // Common schemas
 const FileStorageConfigSchema = z.object({
@@ -93,7 +93,7 @@ export async function listNamespaces(params: z.infer<typeof ListNamespacesSchema
 // Get Namespace
 export const GetNamespaceSchema = z.object({
   apiKey: ApiKeySchema.optional(),
-  namespaceId: NamespaceIdSchema,
+  namespaceId: NamespaceIdSchema.optional(),
   tenantId: z.string().optional(),
 });
 
@@ -102,7 +102,7 @@ export async function getNamespace(params: z.infer<typeof GetNamespaceSchema>) {
   
   return makeApiRequest({
     method: "GET",
-    path: `/v1/namespaces/${namespaceId}`,
+    path: `/v1/namespaces/${getDefaultNamespaceId(namespaceId)}`,
     apiKey,
     tenantId,
   });
@@ -111,12 +111,12 @@ export async function getNamespace(params: z.infer<typeof GetNamespaceSchema>) {
 // Update Namespace
 export const UpdateNamespaceSchema = z.object({
   apiKey: ApiKeySchema.optional(),
-  namespaceId: NamespaceIdSchema,
+  namespaceId: NamespaceIdSchema.optional(),
   name: z.string().optional(),
   fileStorageConfig: FileStorageConfigSchema.optional(),
   vectorStorageConfig: VectorStorageConfigSchema.optional(),
   embeddingModelConfig: EmbeddingModelConfigSchema.optional(),
-  webScraperConfig: WebScraperConfigSchema,
+  webScraperConfig: WebScraperConfigSchema.optional(),
   tenantId: z.string().optional(),
 });
 
@@ -124,8 +124,8 @@ export async function updateNamespace(params: z.infer<typeof UpdateNamespaceSche
   const { apiKey, namespaceId, tenantId, ...requestBody } = params;
   
   return makeApiRequest({
-    method: "PATCH",
-    path: `/v1/namespaces/${namespaceId}`,
+    method: "PUT",
+    path: `/v1/namespaces/${getDefaultNamespaceId(namespaceId)}`,
     apiKey,
     tenantId,
     body: requestBody,
@@ -135,7 +135,7 @@ export async function updateNamespace(params: z.infer<typeof UpdateNamespaceSche
 // Delete Namespace
 export const DeleteNamespaceSchema = z.object({
   apiKey: ApiKeySchema.optional(),
-  namespaceId: NamespaceIdSchema,
+  namespaceId: NamespaceIdSchema.optional(),
   tenantId: z.string().optional(),
 });
 
@@ -144,7 +144,7 @@ export async function deleteNamespace(params: z.infer<typeof DeleteNamespaceSche
   
   return makeApiRequest({
     method: "DELETE",
-    path: `/v1/namespaces/${namespaceId}`,
+    path: `/v1/namespaces/${getDefaultNamespaceId(namespaceId)}`,
     apiKey,
     tenantId,
   });
