@@ -52,7 +52,7 @@ const WebScraperConfigSchema = z.object({
 
 // Create Namespace
 export const CreateNamespaceSchema = z.object({
-  apiKey: ApiKeySchema,
+  apiKey: ApiKeySchema.optional(),
   name: z.string().min(1, "Namespace name is required"),
   fileStorageConfig: FileStorageConfigSchema,
   vectorStorageConfig: VectorStorageConfigSchema,
@@ -75,7 +75,7 @@ export async function createNamespace(params: z.infer<typeof CreateNamespaceSche
 
 // List Namespaces
 export const ListNamespacesSchema = z.object({
-  apiKey: ApiKeySchema,
+  apiKey: ApiKeySchema.optional(),
   tenantId: z.string().optional(),
 });
 
@@ -92,7 +92,7 @@ export async function listNamespaces(params: z.infer<typeof ListNamespacesSchema
 
 // Get Namespace
 export const GetNamespaceSchema = z.object({
-  apiKey: ApiKeySchema,
+  apiKey: ApiKeySchema.optional(),
   namespaceId: NamespaceIdSchema,
   tenantId: z.string().optional(),
 });
@@ -110,7 +110,7 @@ export async function getNamespace(params: z.infer<typeof GetNamespaceSchema>) {
 
 // Update Namespace
 export const UpdateNamespaceSchema = z.object({
-  apiKey: ApiKeySchema,
+  apiKey: ApiKeySchema.optional(),
   namespaceId: NamespaceIdSchema,
   name: z.string().optional(),
   fileStorageConfig: FileStorageConfigSchema.optional(),
@@ -134,7 +134,7 @@ export async function updateNamespace(params: z.infer<typeof UpdateNamespaceSche
 
 // Delete Namespace
 export const DeleteNamespaceSchema = z.object({
-  apiKey: ApiKeySchema,
+  apiKey: ApiKeySchema.optional(),
   namespaceId: NamespaceIdSchema,
   tenantId: z.string().optional(),
 });

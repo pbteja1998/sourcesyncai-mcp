@@ -1,30 +1,31 @@
 # Dependencies
 node_modules/
-
-# Build
-dist/
-build/
-
-# Logs
-logs
-*.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# Environment
+# Build output
+build/
+dist/
+out/
+
+# Environment variables
 .env
 .env.local
-.env.*.local
-claude_desktop_config.json
+.env.development.local
+.env.test.local
+.env.production.local
 
-# IDE
+# Editor directories and files
 .idea/
 .vscode/
-*.swp
-*.swo
-.cursorrules.md
-IMPLEMENTATION.md
-v1.2.md
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
-# OS
+# OS files
 .DS_Store
 Thumbs.db 

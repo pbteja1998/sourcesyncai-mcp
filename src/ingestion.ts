@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { makeApiRequest, ApiKeySchema, NamespaceIdSchema } from "./utils.js";
+import { makeApiRequest, ApiKeySchema, NamespaceIdSchema, getDefaultNamespaceId } from "./utils.js";
 
 // Common schemas
 const ChunkConfigSchema = z.object({
@@ -9,8 +9,8 @@ const ChunkConfigSchema = z.object({
 
 // Ingest Text
 export const IngestTextSchema = z.object({
-  apiKey: ApiKeySchema,
-  namespaceId: NamespaceIdSchema,
+  apiKey: ApiKeySchema.optional(),
+  namespaceId: NamespaceIdSchema.optional(),
   ingestConfig: z.object({
     source: z.literal("TEXT"),
     config: z.object({
@@ -24,21 +24,24 @@ export const IngestTextSchema = z.object({
 });
 
 export async function ingestText(params: z.infer<typeof IngestTextSchema>) {
-  const { apiKey, tenantId, ...requestBody } = params;
+  const { apiKey, namespaceId, tenantId, ...requestBody } = params;
   
   return makeApiRequest({
     method: "POST",
     path: "/v1/ingest/text",
     apiKey,
     tenantId,
-    body: requestBody,
+    body: {
+      ...requestBody,
+      namespaceId: getDefaultNamespaceId(namespaceId),
+    },
   });
 }
 
 // Ingest URLs
 export const IngestUrlsSchema = z.object({
-  apiKey: ApiKeySchema,
-  namespaceId: NamespaceIdSchema,
+  apiKey: ApiKeySchema.optional(),
+  namespaceId: NamespaceIdSchema.optional(),
   ingestConfig: z.object({
     urls: z.array(z.string()),
     scrapeOptions: z.object({
@@ -52,61 +55,70 @@ export const IngestUrlsSchema = z.object({
 });
 
 export async function ingestUrls(params: z.infer<typeof IngestUrlsSchema>) {
-  const { apiKey, tenantId, ...requestBody } = params;
+  const { apiKey, namespaceId, tenantId, ...requestBody } = params;
   
   return makeApiRequest({
     method: "POST",
     path: "/v1/ingest/urls",
     apiKey,
     tenantId,
-    body: requestBody,
+    body: {
+      ...requestBody,
+      namespaceId: getDefaultNamespaceId(namespaceId),
+    },
   });
 }
 
 // Ingest Sitemap
 export const IngestSitemapSchema = z.object({
-  apiKey: ApiKeySchema,
-  namespaceId: NamespaceIdSchema,
+  apiKey: ApiKeySchema.optional(),
+  namespaceId: NamespaceIdSchema.optional(),
   url: z.string().url(),
   tenantId: z.string().optional(),
 });
 
 export async function ingestSitemap(params: z.infer<typeof IngestSitemapSchema>) {
-  const { apiKey, tenantId, ...requestBody } = params;
+  const { apiKey, namespaceId, tenantId, ...requestBody } = params;
   
   return makeApiRequest({
     method: "POST",
     path: "/v1/ingest/sitemap",
     apiKey,
     tenantId,
-    body: requestBody,
+    body: {
+      ...requestBody,
+      namespaceId: getDefaultNamespaceId(namespaceId),
+    },
   });
 }
 
 // Ingest Website
 export const IngestWebsiteSchema = z.object({
-  apiKey: ApiKeySchema,
-  namespaceId: NamespaceIdSchema,
+  apiKey: ApiKeySchema.optional(),
+  namespaceId: NamespaceIdSchema.optional(),
   url: z.string().url(),
   tenantId: z.string().optional(),
 });
 
 export async function ingestWebsite(params: z.infer<typeof IngestWebsiteSchema>) {
-  const { apiKey, tenantId, ...requestBody } = params;
+  const { apiKey, namespaceId, tenantId, ...requestBody } = params;
   
   return makeApiRequest({
     method: "POST",
     path: "/v1/ingest/website",
     apiKey,
     tenantId,
-    body: requestBody,
+    body: {
+      ...requestBody,
+      namespaceId: getDefaultNamespaceId(namespaceId),
+    },
   });
 }
 
 // Ingest from external services (Notion, Google Drive, Dropbox, OneDrive, Box)
 const ExternalServiceSchema = z.object({
-  apiKey: ApiKeySchema,
-  namespaceId: NamespaceIdSchema,
+  apiKey: ApiKeySchema.optional(),
+  namespaceId: NamespaceIdSchema.optional(),
   connectionId: z.string(),
   tenantId: z.string().optional(),
 });
@@ -115,14 +127,17 @@ const ExternalServiceSchema = z.object({
 export const IngestNotionSchema = ExternalServiceSchema;
 
 export async function ingestNotion(params: z.infer<typeof IngestNotionSchema>) {
-  const { apiKey, tenantId, ...requestBody } = params;
+  const { apiKey, namespaceId, tenantId, ...requestBody } = params;
   
   return makeApiRequest({
     method: "POST",
     path: "/v1/ingest/notion",
     apiKey,
     tenantId,
-    body: requestBody,
+    body: {
+      ...requestBody,
+      namespaceId: getDefaultNamespaceId(namespaceId),
+    },
   });
 }
 
@@ -130,14 +145,17 @@ export async function ingestNotion(params: z.infer<typeof IngestNotionSchema>) {
 export const IngestGoogleDriveSchema = ExternalServiceSchema;
 
 export async function ingestGoogleDrive(params: z.infer<typeof IngestGoogleDriveSchema>) {
-  const { apiKey, tenantId, ...requestBody } = params;
+  const { apiKey, namespaceId, tenantId, ...requestBody } = params;
   
   return makeApiRequest({
     method: "POST",
     path: "/v1/ingest/google-drive",
     apiKey,
     tenantId,
-    body: requestBody,
+    body: {
+      ...requestBody,
+      namespaceId: getDefaultNamespaceId(namespaceId),
+    },
   });
 }
 
@@ -145,14 +163,17 @@ export async function ingestGoogleDrive(params: z.infer<typeof IngestGoogleDrive
 export const IngestDropboxSchema = ExternalServiceSchema;
 
 export async function ingestDropbox(params: z.infer<typeof IngestDropboxSchema>) {
-  const { apiKey, tenantId, ...requestBody } = params;
+  const { apiKey, namespaceId, tenantId, ...requestBody } = params;
   
   return makeApiRequest({
     method: "POST",
     path: "/v1/ingest/dropbox",
     apiKey,
     tenantId,
-    body: requestBody,
+    body: {
+      ...requestBody,
+      namespaceId: getDefaultNamespaceId(namespaceId),
+    },
   });
 }
 
@@ -160,14 +181,17 @@ export async function ingestDropbox(params: z.infer<typeof IngestDropboxSchema>)
 export const IngestOneDriveSchema = ExternalServiceSchema;
 
 export async function ingestOneDrive(params: z.infer<typeof IngestOneDriveSchema>) {
-  const { apiKey, tenantId, ...requestBody } = params;
+  const { apiKey, namespaceId, tenantId, ...requestBody } = params;
   
   return makeApiRequest({
     method: "POST",
     path: "/v1/ingest/onedrive",
     apiKey,
     tenantId,
-    body: requestBody,
+    body: {
+      ...requestBody,
+      namespaceId: getDefaultNamespaceId(namespaceId),
+    },
   });
 }
 
@@ -175,13 +199,16 @@ export async function ingestOneDrive(params: z.infer<typeof IngestOneDriveSchema
 export const IngestBoxSchema = ExternalServiceSchema;
 
 export async function ingestBox(params: z.infer<typeof IngestBoxSchema>) {
-  const { apiKey, tenantId, ...requestBody } = params;
+  const { apiKey, namespaceId, tenantId, ...requestBody } = params;
   
   return makeApiRequest({
     method: "POST",
     path: "/v1/ingest/box",
     apiKey,
     tenantId,
-    body: requestBody,
+    body: {
+      ...requestBody,
+      namespaceId: getDefaultNamespaceId(namespaceId),
+    },
   });
 } 

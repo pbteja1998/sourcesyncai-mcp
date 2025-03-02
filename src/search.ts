@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { makeApiRequest, ApiKeySchema, NamespaceIdSchema } from "./utils.js";
+import { makeApiRequest, ApiKeySchema, NamespaceIdSchema, getDefaultNamespaceId } from "./utils.js";
 
 // Common schemas
 const FilterSchema = z.object({
@@ -8,9 +8,9 @@ const FilterSchema = z.object({
 
 // Semantic Search
 export const SemanticSearchSchema = z.object({
-  apiKey: ApiKeySchema,
+  apiKey: ApiKeySchema.optional(),
   query: z.string().min(1, "Search query is required"),
-  namespaceId: NamespaceIdSchema,
+  namespaceId: NamespaceIdSchema.optional(),
   topK: z.number().min(1).max(100).optional(),
   scoreThreshold: z.number().min(0).max(1).optional(),
   filter: FilterSchema,
@@ -19,22 +19,25 @@ export const SemanticSearchSchema = z.object({
 });
 
 export async function semanticSearch(params: z.infer<typeof SemanticSearchSchema>) {
-  const { apiKey, tenantId, ...requestBody } = params;
+  const { apiKey, namespaceId, tenantId, ...requestBody } = params;
   
   return makeApiRequest({
     method: "POST",
     path: "/v1/search",
     apiKey,
     tenantId,
-    body: requestBody,
+    body: {
+      ...requestBody,
+      namespaceId: getDefaultNamespaceId(namespaceId),
+    },
   });
 }
 
 // Hybrid Search
 export const HybridSearchSchema = z.object({
-  apiKey: ApiKeySchema,
+  apiKey: ApiKeySchema.optional(),
   query: z.string().min(1, "Search query is required"),
-  namespaceId: NamespaceIdSchema,
+  namespaceId: NamespaceIdSchema.optional(),
   topK: z.number().min(1).max(100).optional(),
   scoreThreshold: z.number().min(0).max(1).optional(),
   filter: FilterSchema,
@@ -47,13 +50,16 @@ export const HybridSearchSchema = z.object({
 });
 
 export async function hybridSearch(params: z.infer<typeof HybridSearchSchema>) {
-  const { apiKey, tenantId, ...requestBody } = params;
+  const { apiKey, namespaceId, tenantId, ...requestBody } = params;
   
   return makeApiRequest({
     method: "POST",
     path: "/v1/search/hybrid",
     apiKey,
     tenantId,
-    body: requestBody,
+    body: {
+      ...requestBody,
+      namespaceId: getDefaultNamespaceId(namespaceId),
+    },
   });
 } 
