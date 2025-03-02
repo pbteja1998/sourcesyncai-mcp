@@ -1,8 +1,6 @@
 import { z } from "zod";
 
-export const ApiKeySchema = z.string().min(1, "API key is required");
-export const NamespaceIdSchema = z.string().min(1, "Namespace ID is required");
-export const OrgIdSchema = z.string().min(1, "Organization ID is required");
+export const NamespaceIdSchema = z.string().describe("Namespace ID for SourceSync.ai.");
 
 // Default values from environment variables
 const DEFAULT_API_URL = process.env.SOURCESYNC_API_URL || "https://api.sourcesync.ai";
@@ -14,7 +12,6 @@ const DEFAULT_NAMESPACE_ID = process.env.SOURCESYNC_DEFAULT_NAMESPACE_ID;
 export interface ApiRequestOptions {
   method: string;
   path: string;
-  apiKey?: string;
   body?: any;
   tenantId?: string;
   queryParams?: Record<string, string>;
@@ -39,16 +36,15 @@ export class SourceSyncError extends Error {
 export async function makeApiRequest({
   method,
   path,
-  apiKey,
   body,
   tenantId,
   queryParams,
 }: ApiRequestOptions) {
-  // Use the default API key from environment if none provided
-  const effectiveApiKey = apiKey || DEFAULT_API_KEY;
+  // Always use the default API key from environment
+  const effectiveApiKey = DEFAULT_API_KEY;
   
   if (!effectiveApiKey) {
-    throw new SourceSyncError("API key is required. Provide it in the request or set SOURCESYNC_DEFAULT_API_KEY environment variable.");
+    throw new SourceSyncError("API key is required. Set SOURCESYNC_DEFAULT_API_KEY environment variable.");
   }
   
   const url = new URL(`${DEFAULT_API_URL}${path}`);
@@ -88,19 +84,36 @@ export async function makeApiRequest({
     
     clearTimeout(timeoutId);
 
-    const data = await response.json();
-
     if (!response.ok) {
-      throw new SourceSyncError(
-        `SourceSync API error: ${data.error || response.statusText}`,
-        {
-          status: response.status,
-          error: data.error,
-          details: data.details,
+      // Try to parse as JSON first
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        try {
+          // Clone the response before reading it
+          const errorData = await response.clone().json();
+          throw new SourceSyncError(`SourceSync API error`, {
+            status: response.status,
+            error: errorData
+          });
+        } catch (parseError) {
+          // If JSON parsing fails, get the raw text
+          const errorText = await response.text();
+          throw new SourceSyncError(`SourceSync API error`, {
+            status: response.status,
+            error: errorText
+          });
         }
-      );
+      } else {
+        // Not JSON, get as text
+        const errorText = await response.text();
+        throw new SourceSyncError(`SourceSync API error`, {
+          status: response.status,
+          error: errorText
+        });
+      }
     }
 
+    const data = await response.json();
     return data;
   } catch (error: unknown) {
     if (error instanceof SourceSyncError) {

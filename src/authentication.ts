@@ -1,18 +1,15 @@
 import { z } from "zod";
-import { makeApiRequest, ApiKeySchema } from "./utils.js";
+import { makeApiRequest } from "./utils.js";
 
-export const ValidateApiKeySchema = z.object({
-  apiKey: ApiKeySchema.optional(),
-});
+export const ValidateApiKeySchema = z.object({});
 
-export async function validateApiKey(apiKey?: string): Promise<boolean> {
+export async function validateApiKey(): Promise<boolean> {
   try {
-    // Make a simple request to check if the API key is valid
+    // Make a simple request to check if the default API key is valid
     // We'll use the list namespaces endpoint as it's a lightweight call
     await makeApiRequest({
       method: "GET",
       path: "/v1/namespaces",
-      apiKey, // The makeApiRequest function will use the default API key if this is undefined
     });
     return true;
   } catch (error) {

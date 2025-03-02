@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { makeApiRequest, ApiKeySchema, NamespaceIdSchema, getDefaultNamespaceId } from "./utils.js";
+import { makeApiRequest, NamespaceIdSchema, getDefaultNamespaceId } from "./utils.js";
 
 // Common schemas
 const FileStorageConfigSchema = z.object({
@@ -52,7 +52,6 @@ const WebScraperConfigSchema = z.object({
 
 // Create Namespace
 export const CreateNamespaceSchema = z.object({
-  apiKey: ApiKeySchema.optional(),
   name: z.string().min(1, "Namespace name is required"),
   fileStorageConfig: FileStorageConfigSchema,
   vectorStorageConfig: VectorStorageConfigSchema,
@@ -62,12 +61,11 @@ export const CreateNamespaceSchema = z.object({
 });
 
 export async function createNamespace(params: z.infer<typeof CreateNamespaceSchema>) {
-  const { apiKey, tenantId, ...requestBody } = params;
+  const { tenantId, ...requestBody } = params;
   
   return makeApiRequest({
     method: "POST",
     path: "/v1/namespaces",
-    apiKey,
     tenantId,
     body: requestBody,
   });
@@ -75,42 +73,37 @@ export async function createNamespace(params: z.infer<typeof CreateNamespaceSche
 
 // List Namespaces
 export const ListNamespacesSchema = z.object({
-  apiKey: ApiKeySchema.optional(),
   tenantId: z.string().optional(),
 });
 
 export async function listNamespaces(params: z.infer<typeof ListNamespacesSchema>) {
-  const { apiKey, tenantId } = params;
+  const { tenantId } = params;
   
   return makeApiRequest({
     method: "GET",
     path: "/v1/namespaces",
-    apiKey,
     tenantId,
   });
 }
 
 // Get Namespace
 export const GetNamespaceSchema = z.object({
-  apiKey: ApiKeySchema.optional(),
   namespaceId: NamespaceIdSchema.optional(),
   tenantId: z.string().optional(),
 });
 
 export async function getNamespace(params: z.infer<typeof GetNamespaceSchema>) {
-  const { apiKey, namespaceId, tenantId } = params;
+  const { namespaceId, tenantId } = params;
   
   return makeApiRequest({
     method: "GET",
     path: `/v1/namespaces/${getDefaultNamespaceId(namespaceId)}`,
-    apiKey,
     tenantId,
   });
 }
 
 // Update Namespace
 export const UpdateNamespaceSchema = z.object({
-  apiKey: ApiKeySchema.optional(),
   namespaceId: NamespaceIdSchema.optional(),
   name: z.string().optional(),
   fileStorageConfig: FileStorageConfigSchema.optional(),
@@ -121,12 +114,11 @@ export const UpdateNamespaceSchema = z.object({
 });
 
 export async function updateNamespace(params: z.infer<typeof UpdateNamespaceSchema>) {
-  const { apiKey, namespaceId, tenantId, ...requestBody } = params;
+  const { namespaceId, tenantId, ...requestBody } = params;
   
   return makeApiRequest({
     method: "PUT",
     path: `/v1/namespaces/${getDefaultNamespaceId(namespaceId)}`,
-    apiKey,
     tenantId,
     body: requestBody,
   });
@@ -134,18 +126,16 @@ export async function updateNamespace(params: z.infer<typeof UpdateNamespaceSche
 
 // Delete Namespace
 export const DeleteNamespaceSchema = z.object({
-  apiKey: ApiKeySchema.optional(),
   namespaceId: NamespaceIdSchema.optional(),
   tenantId: z.string().optional(),
 });
 
 export async function deleteNamespace(params: z.infer<typeof DeleteNamespaceSchema>) {
-  const { apiKey, namespaceId, tenantId } = params;
+  const { namespaceId, tenantId } = params;
   
   return makeApiRequest({
     method: "DELETE",
     path: `/v1/namespaces/${getDefaultNamespaceId(namespaceId)}`,
-    apiKey,
     tenantId,
   });
 } 

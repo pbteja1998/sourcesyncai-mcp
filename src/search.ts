@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { makeApiRequest, ApiKeySchema, NamespaceIdSchema, getDefaultNamespaceId } from "./utils.js";
+import { makeApiRequest, NamespaceIdSchema, getDefaultNamespaceId } from "./utils.js";
 
 // Common schemas
 const FilterSchema = z.object({
@@ -8,7 +8,6 @@ const FilterSchema = z.object({
 
 // Semantic Search
 export const SemanticSearchSchema = z.object({
-  apiKey: ApiKeySchema.optional(),
   query: z.string().min(1, "Search query is required"),
   namespaceId: NamespaceIdSchema.optional(),
   topK: z.number().min(1).max(100).optional(),
@@ -19,12 +18,11 @@ export const SemanticSearchSchema = z.object({
 });
 
 export async function semanticSearch(params: z.infer<typeof SemanticSearchSchema>) {
-  const { apiKey, namespaceId, tenantId, ...requestBody } = params;
+  const { namespaceId, tenantId, ...requestBody } = params;
   
   return makeApiRequest({
     method: "POST",
     path: "/v1/search",
-    apiKey,
     tenantId,
     body: {
       ...requestBody,
@@ -35,7 +33,6 @@ export async function semanticSearch(params: z.infer<typeof SemanticSearchSchema
 
 // Hybrid Search
 export const HybridSearchSchema = z.object({
-  apiKey: ApiKeySchema.optional(),
   query: z.string().min(1, "Search query is required"),
   namespaceId: NamespaceIdSchema.optional(),
   topK: z.number().min(1).max(100).optional(),
@@ -50,12 +47,11 @@ export const HybridSearchSchema = z.object({
 });
 
 export async function hybridSearch(params: z.infer<typeof HybridSearchSchema>) {
-  const { apiKey, namespaceId, tenantId, ...requestBody } = params;
+  const { namespaceId, tenantId, ...requestBody } = params;
   
   return makeApiRequest({
     method: "POST",
     path: "/v1/search/hybrid",
-    apiKey,
     tenantId,
     body: {
       ...requestBody,

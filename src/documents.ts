@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { makeApiRequest, ApiKeySchema, NamespaceIdSchema, getDefaultNamespaceId } from "./utils.js";
+import { makeApiRequest, NamespaceIdSchema, getDefaultNamespaceId } from "./utils.js";
 
 // Common schemas
 const DocumentTypeEnum = z.enum([
@@ -43,7 +43,6 @@ const PaginationSchema = z.object({
 
 // Fetch Documents
 export const FetchDocumentsSchema = z.object({
-  apiKey: ApiKeySchema.optional(),
   namespaceId: NamespaceIdSchema.optional(),
   filterConfig: FilterConfigSchema,
   includeConfig: IncludeConfigSchema,
@@ -52,12 +51,11 @@ export const FetchDocumentsSchema = z.object({
 });
 
 export async function fetchDocuments(params: z.infer<typeof FetchDocumentsSchema>) {
-  const { apiKey, namespaceId, tenantId, ...requestBody } = params;
+  const { namespaceId, tenantId, ...requestBody } = params;
   
   return makeApiRequest({
     method: "POST",
     path: "/v1/documents",
-    apiKey,
     tenantId,
     body: {
       ...requestBody,
@@ -68,7 +66,6 @@ export async function fetchDocuments(params: z.infer<typeof FetchDocumentsSchema
 
 // Update Documents
 export const UpdateDocumentsSchema = z.object({
-  apiKey: ApiKeySchema.optional(),
   namespaceId: NamespaceIdSchema.optional(),
   filterConfig: FilterConfigSchema,
   includeConfig: IncludeConfigSchema,
@@ -85,12 +82,11 @@ export const UpdateDocumentsSchema = z.object({
 });
 
 export async function updateDocuments(params: z.infer<typeof UpdateDocumentsSchema>) {
-  const { apiKey, namespaceId, tenantId, ...requestBody } = params;
+  const { namespaceId, tenantId, ...requestBody } = params;
   
   return makeApiRequest({
     method: "PATCH",
     path: "/v1/documents",
-    apiKey,
     tenantId,
     body: {
       ...requestBody,
@@ -101,19 +97,17 @@ export async function updateDocuments(params: z.infer<typeof UpdateDocumentsSche
 
 // Delete Documents
 export const DeleteDocumentsSchema = z.object({
-  apiKey: ApiKeySchema.optional(),
   namespaceId: NamespaceIdSchema.optional(),
   filterConfig: FilterConfigSchema,
   tenantId: z.string().optional(),
 });
 
 export async function deleteDocuments(params: z.infer<typeof DeleteDocumentsSchema>) {
-  const { apiKey, namespaceId, tenantId, ...requestBody } = params;
+  const { namespaceId, tenantId, ...requestBody } = params;
   
   return makeApiRequest({
     method: "DELETE",
     path: "/v1/documents",
-    apiKey,
     tenantId,
     body: {
       ...requestBody,
@@ -124,19 +118,17 @@ export async function deleteDocuments(params: z.infer<typeof DeleteDocumentsSche
 
 // Resync Documents
 export const ResyncDocumentsSchema = z.object({
-  apiKey: ApiKeySchema.optional(),
   namespaceId: NamespaceIdSchema.optional(),
   filterConfig: FilterConfigSchema,
   tenantId: z.string().optional(),
 });
 
 export async function resyncDocuments(params: z.infer<typeof ResyncDocumentsSchema>) {
-  const { apiKey, namespaceId, tenantId, ...requestBody } = params;
+  const { namespaceId, tenantId, ...requestBody } = params;
   
   return makeApiRequest({
     method: "POST",
     path: "/v1/documents/resync",
-    apiKey,
     tenantId,
     body: {
       ...requestBody,
