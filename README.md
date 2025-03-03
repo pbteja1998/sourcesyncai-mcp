@@ -1,4 +1,5 @@
 # SourceSync.ai MCP Server
+
 [![smithery badge](https://smithery.ai/badge/@pbteja1998/sourcesyncai-mcp)](https://smithery.ai/server/@pbteja1998/sourcesyncai-mcp)
 
 A Model Context Protocol (MCP) server implementation for the [SourceSync.ai](https://sourcesync.ai) API. This server allows AI models to interact with SourceSync.ai's knowledge management platform through a standardized interface.

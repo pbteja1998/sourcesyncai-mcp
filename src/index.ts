@@ -110,6 +110,7 @@ async function safeApiCall<T>(apiCall: () => Promise<T>) {
 // Register authentication tool
 server.tool(
   'validateApiKey',
+  'Validates the API key by attempting to list namespaces. Returns the list of namespaces if successful.',
   validateApiKeySchema.shape,
   async (params: ValidateApiKeyParams) => {
     return safeApiCall(async () => {
@@ -126,6 +127,7 @@ server.tool(
 // Register namespace tools
 server.tool(
   'createNamespace',
+  'Creates a new namespace with the provided configuration. Requires a name, file storage configuration, vector storage configuration, and embedding model configuration.',
   createNamespaceSchema.shape,
   async (params: CreateNamespaceParams) => {
     return safeApiCall(async () => {
@@ -141,6 +143,7 @@ server.tool(
 
 server.tool(
   'listNamespaces',
+  'Lists all namespaces available for the current API key and optional tenant ID.',
   listNamespacesSchema.shape,
   async (params: ListNamespacesParams) => {
     return safeApiCall(async () => {
@@ -156,6 +159,7 @@ server.tool(
 
 server.tool(
   'getNamespace',
+  'Retrieves a specific namespace by its ID.',
   getNamespaceSchema.shape,
   async (params: GetNamespaceParams) => {
     return safeApiCall(async () => {
@@ -171,6 +175,7 @@ server.tool(
 
 server.tool(
   'updateNamespace',
+  'Updates an existing namespace with the provided configuration parameters.',
   updateNamespaceSchema.shape,
   async (params: UpdateNamespaceParams) => {
     return safeApiCall(async () => {
@@ -186,6 +191,7 @@ server.tool(
 
 server.tool(
   'deleteNamespace',
+  'Permanently deletes a namespace by its ID.',
   deleteNamespaceSchema.shape,
   async (params: DeleteNamespaceParams) => {
     return safeApiCall(async () => {
@@ -202,6 +208,7 @@ server.tool(
 // Register ingestion tools
 server.tool(
   'ingestText',
+  'Ingests raw text content into the namespace. Supports optional metadata and chunk configuration.',
   ingestTextSchema.shape,
   async (params: IngestTextParams) => {
     return safeApiCall(async () => {
@@ -219,66 +226,86 @@ server.tool(
 )
 
 // Add ingestFile tool
-server.tool('ingestFile', IngestFileSchema.shape, async (params) => {
-  return safeApiCall(async () => {
-    const { namespaceId, tenantId, file, metadata, chunkConfig } = params
+server.tool(
+  'ingestFile',
+  'Ingests a file into the namespace. Supports various file formats with automatic parsing.',
+  IngestFileSchema.shape,
+  async (params) => {
+    return safeApiCall(async () => {
+      const { namespaceId, tenantId, file, metadata, chunkConfig } = params
 
-    // Create a client with the provided parameters
-    const client = createClient({ namespaceId, tenantId })
+      // Create a client with the provided parameters
+      const client = createClient({ namespaceId, tenantId })
 
-    // Direct passthrough to the API
-    return await client.ingestFile({
-      file: file as unknown as File, // Type cast to File as required by the client
-      metadata,
-      chunkConfig,
+      // Direct passthrough to the API
+      return await client.ingestFile({
+        file: file as unknown as File, // Type cast to File as required by the client
+        metadata,
+        chunkConfig,
+      })
     })
-  })
-})
+  },
+)
 
 // Add ingestUrls tool
-server.tool('ingestUrls', IngestUrlsSchema.shape, async (params) => {
-  return safeApiCall(async () => {
-    const { namespaceId, tenantId, ingestConfig } = params
+server.tool(
+  'ingestUrls',
+  'Ingests content from a list of URLs. Supports scraping options and metadata.',
+  IngestUrlsSchema.shape,
+  async (params) => {
+    return safeApiCall(async () => {
+      const { namespaceId, tenantId, ingestConfig } = params
 
-    // Create a client with the provided parameters
-    const client = createClient({ namespaceId, tenantId })
+      // Create a client with the provided parameters
+      const client = createClient({ namespaceId, tenantId })
 
-    // Direct passthrough to the API
-    return await client.ingestUrls({
-      ingestConfig,
+      // Direct passthrough to the API
+      return await client.ingestUrls({
+        ingestConfig,
+      })
     })
-  })
-})
+  },
+)
 
 // Add ingestSitemap tool
-server.tool('ingestSitemap', IngestSitemapSchema.shape, async (params) => {
-  return safeApiCall(async () => {
-    const { namespaceId, ingestConfig, tenantId } = params
+server.tool(
+  'ingestSitemap',
+  'Ingests content from a website using its sitemap.xml. Supports path filtering and link limits.',
+  IngestSitemapSchema.shape,
+  async (params) => {
+    return safeApiCall(async () => {
+      const { namespaceId, ingestConfig, tenantId } = params
 
-    // Create a client with the provided parameters
-    const client = createClient({ namespaceId, tenantId })
+      // Create a client with the provided parameters
+      const client = createClient({ namespaceId, tenantId })
 
-    // Direct passthrough to the API
-    return await client.ingestSitemap({
-      ingestConfig,
+      // Direct passthrough to the API
+      return await client.ingestSitemap({
+        ingestConfig,
+      })
     })
-  })
-})
+  },
+)
 
 // Add ingestWebsite tool
-server.tool('ingestWebsite', IngestWebsiteSchema.shape, async (params) => {
-  return safeApiCall(async () => {
-    const { namespaceId, ingestConfig, tenantId } = params
+server.tool(
+  'ingestWebsite',
+  'Crawls and ingests content from a website recursively. Supports depth control and path filtering.',
+  IngestWebsiteSchema.shape,
+  async (params) => {
+    return safeApiCall(async () => {
+      const { namespaceId, ingestConfig, tenantId } = params
 
-    // Create a client with the provided parameters
-    const client = createClient({ namespaceId, tenantId })
+      // Create a client with the provided parameters
+      const client = createClient({ namespaceId, tenantId })
 
-    // Direct passthrough to the API
-    return await client.ingestWebsite({
-      ingestConfig,
+      // Direct passthrough to the API
+      return await client.ingestWebsite({
+        ingestConfig,
+      })
     })
-  })
-})
+  },
+)
 
 // Add ingestConnector tool
 server.tool(
@@ -305,6 +332,7 @@ server.tool(
 // Add getIngestJobRunStatus tool
 server.tool(
   'getIngestJobRunStatus',
+  'Checks the status of a previously submitted ingestion job.',
   IngestJobRunStatusSchema.shape,
   async (params) => {
     return safeApiCall(async () => {
@@ -323,6 +351,7 @@ server.tool(
 // Register document tools
 server.tool(
   'fetchDocuments',
+  'Fetches documents from the namespace based on filter criteria. Supports pagination and including specific document properties.',
   FetchDocumentsSchema.shape,
   async (params: any) => {
     return safeApiCall(async () => {
@@ -384,55 +413,64 @@ server.tool(
 )
 
 // Add document management tools
-server.tool('getDocuments', FetchDocumentsSchema.shape, async (params) => {
-  return safeApiCall(async () => {
-    const {
-      namespaceId,
-      tenantId,
-      documentIds,
-      pagination,
-      filterConfig,
-      includeConfig,
-    } = params
+server.tool(
+  'getDocuments',
+  'Retrieves documents from the namespace based on filter criteria. Similar to fetchDocuments but with a more direct interface.',
+  FetchDocumentsSchema.shape,
+  async (params) => {
+    return safeApiCall(async () => {
+      const {
+        namespaceId,
+        tenantId,
+        documentIds,
+        pagination,
+        filterConfig,
+        includeConfig,
+      } = params
 
-    // Create a client with the provided parameters
-    const client = createClient({ namespaceId, tenantId })
+      // Create a client with the provided parameters
+      const client = createClient({ namespaceId, tenantId })
 
-    // Add documentIds to filterConfig if provided
-    if (documentIds && documentIds.length > 0 && !filterConfig.documentIds) {
-      filterConfig.documentIds = documentIds
-    }
+      // Add documentIds to filterConfig if provided
+      if (documentIds && documentIds.length > 0 && !filterConfig.documentIds) {
+        filterConfig.documentIds = documentIds
+      }
 
-    // Call the getDocuments method with properly structured parameters
-    return await client.getDocuments({
-      filterConfig: {
-        ...filterConfig,
-        // Convert string enum values to their SourceSync enum equivalents
-        documentTypes: filterConfig.documentTypes?.map(
-          (type: string) =>
-            SourceSyncDocumentType[type as keyof typeof SourceSyncDocumentType],
-        ),
-        documentIngestionSources: filterConfig.documentIngestionSources?.map(
-          (source: string) =>
-            SourceSyncIngestionSource[
-              source as keyof typeof SourceSyncIngestionSource
-            ],
-        ),
-        documentIngestionStatuses: filterConfig.documentIngestionStatuses?.map(
-          (status: string) =>
-            SourceSyncIngestionStatus[
-              status as keyof typeof SourceSyncIngestionStatus
-            ],
-        ),
-      },
-      pagination,
-      includeConfig: includeConfig || { documents: true },
+      // Call the getDocuments method with properly structured parameters
+      return await client.getDocuments({
+        filterConfig: {
+          ...filterConfig,
+          // Convert string enum values to their SourceSync enum equivalents
+          documentTypes: filterConfig.documentTypes?.map(
+            (type: string) =>
+              SourceSyncDocumentType[
+                type as keyof typeof SourceSyncDocumentType
+              ],
+          ),
+          documentIngestionSources: filterConfig.documentIngestionSources?.map(
+            (source: string) =>
+              SourceSyncIngestionSource[
+                source as keyof typeof SourceSyncIngestionSource
+              ],
+          ),
+          documentIngestionStatuses:
+            filterConfig.documentIngestionStatuses?.map(
+              (status: string) =>
+                SourceSyncIngestionStatus[
+                  status as keyof typeof SourceSyncIngestionStatus
+                ],
+            ),
+        },
+        pagination,
+        includeConfig: includeConfig || { documents: true },
+      })
     })
-  })
-})
+  },
+)
 
 server.tool(
   'updateDocuments',
+  'Updates metadata for documents that match the specified filter criteria.',
   UpdateDocumentsSchema.shape,
   async (params: any) => {
     return safeApiCall(async () => {
@@ -503,6 +541,7 @@ server.tool(
 
 server.tool(
   'deleteDocuments',
+  'Permanently deletes documents that match the specified filter criteria.',
   DeleteDocumentsSchema.shape,
   async (params: any) => {
     return safeApiCall(async () => {
@@ -548,6 +587,7 @@ server.tool(
 
 server.tool(
   'resyncDocuments',
+  'Reprocesses documents that match the specified filter criteria. Useful for updating after schema changes.',
   ResyncDocumentsSchema.shape,
   async (params: any) => {
     return safeApiCall(async () => {
@@ -594,6 +634,7 @@ server.tool(
 // Add search tools
 server.tool(
   'semanticSearch',
+  'Performs semantic search across the namespace to find relevant content based on meaning rather than exact keyword matches.',
   SemanticSearchSchema.shape,
   async (params: any) => {
     return safeApiCall(async () => {
@@ -622,33 +663,38 @@ server.tool(
   },
 )
 
-server.tool('hybridSearch', HybridSearchSchema.shape, async (params: any) => {
-  return safeApiCall(async () => {
-    const {
-      namespaceId,
-      query,
-      topK,
-      scoreThreshold,
-      filter,
-      hybridConfig,
-      tenantId,
-      searchType,
-    } = params
+server.tool(
+  'hybridSearch',
+  'Performs a combined keyword and semantic search, balancing between exact matches and semantic similarity. Requires hybridConfig with weights for both search types.',
+  HybridSearchSchema.shape,
+  async (params: any) => {
+    return safeApiCall(async () => {
+      const {
+        namespaceId,
+        query,
+        topK,
+        scoreThreshold,
+        filter,
+        hybridConfig,
+        tenantId,
+        searchType,
+      } = params
 
-    // Create a client with the provided parameters
-    const client = createClient({ namespaceId, tenantId })
+      // Create a client with the provided parameters
+      const client = createClient({ namespaceId, tenantId })
 
-    // Call the hybridSearch method with the searchType (default to HYBRID if not provided)
-    return await client.hybridSearch({
-      query,
-      topK,
-      scoreThreshold,
-      filter,
-      hybridConfig,
-      searchType: searchType || SourceSyncSearchType.HYBRID,
+      // Call the hybridSearch method with the searchType (default to HYBRID if not provided)
+      return await client.hybridSearch({
+        query,
+        topK,
+        scoreThreshold,
+        filter,
+        hybridConfig,
+        searchType: searchType || SourceSyncSearchType.HYBRID,
+      })
     })
-  })
-})
+  },
+)
 
 // Register connection tools
 server.tool(
@@ -675,6 +721,7 @@ server.tool(
 
 server.tool(
   'listConnections',
+  'Lists all connections for the current namespace, optionally filtered by connector type.',
   ListConnectionsSchema.shape,
   async (params: any) => {
     return safeApiCall(async () => {
@@ -691,18 +738,23 @@ server.tool(
   },
 )
 
-server.tool('getConnection', GetConnectionSchema.shape, async (params) => {
-  return safeApiCall(async () => {
-    const { namespaceId, tenantId, connectionId } = params
+server.tool(
+  'getConnection',
+  'Retrieves details for a specific connection by its ID.',
+  GetConnectionSchema.shape,
+  async (params) => {
+    return safeApiCall(async () => {
+      const { namespaceId, tenantId, connectionId } = params
 
-    // Create a client with the provided API key
-    const client = createClient({ namespaceId, tenantId })
+      // Create a client with the provided API key
+      const client = createClient({ namespaceId, tenantId })
 
-    return await client.getConnection({
-      connectionId,
+      return await client.getConnection({
+        connectionId,
+      })
     })
-  })
-})
+  },
+)
 
 server.tool(
   'updateConnection',
@@ -727,6 +779,7 @@ server.tool(
 
 server.tool(
   'revokeConnection',
+  'Revokes access for a specific connection, removing the integration with the external service.',
   RevokeConnectionSchema.shape,
   async (params) => {
     return safeApiCall(async () => {
