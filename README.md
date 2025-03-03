@@ -1,4 +1,5 @@
 # SourceSync.ai MCP Server
+[![smithery badge](https://smithery.ai/badge/@pbteja1998/sourcesyncai-mcp)](https://smithery.ai/server/@pbteja1998/sourcesyncai-mcp)
 
 A Model Context Protocol (MCP) server implementation for the [SourceSync.ai](https://sourcesync.ai) API. This server allows AI models to interact with SourceSync.ai's knowledge management platform through a standardized interface.
 
@@ -19,6 +20,14 @@ A Model Context Protocol (MCP) server implementation for the [SourceSync.ai](htt
 ```bash
 # Install and run with your API key and tenant ID
 env SOURCESYNC_API_KEY=your_api_key npx -y sourcesyncai-mcp
+```
+
+### Installing via Smithery
+
+To install sourcesyncai-mcp for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@pbteja1998/sourcesyncai-mcp):
+
+```bash
+npx -y @smithery/cli install @pbteja1998/sourcesyncai-mcp --client claude
 ```
 
 ### Manual Installation
