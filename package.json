@@ -1,30 +1,48 @@
 {
   "name": "sourcesyncai-mcp",
-  "version": "1.0.0",
+  "version": "1.0.8",
   "description": "",
-  "main": "./build/index.js",
   "type": "module",
   "scripts": {
-    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
-    "start": "node build/index.js",
-    "dev": "npm run build && npm run start"
+    "build": "tsc && node -e \"require('fs').chmodSync('dist/index.js', '755')\"",
+    "start": "node dist/index.js",
+    "dev": "npm run build && npm run start",
+    "format": "prettier --write --list-different .",
+    "prepare": "npm run build",
+    "release": "npm run build && npm publish"
   },
   "bin": {
-    "weather": "./build/index.js"
+    "sourcesyncai-mcp": "dist/index.js"
   },
   "files": [
-    "build"
+    "dist"
   ],
-  "keywords": [],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "rag",
+    "data connectors",
+    "sourcesync ai",
+    "retrieval engine"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.6.1",
     "dotenv": "16.4.7",
+    "form-data": "4.0.2",
+    "wretch": "2.11.0",
     "zod": "3.24.2"
   },
   "devDependencies": {
+    "@types/form-data": "2.5.2",
     "@types/node": "22.13.8",
+    "prettier": "3.5.3",
     "typescript": "5.8.2"
   }
 }

@@ -1,0 +1,27 @@
+# Package manager files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Build output
+build/
+dist/
+out/
+
+# Node modules
+node_modules/
+
+# Coverage reports
+coverage/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# OS specific files
+.DS_Store
+Thumbs.db 

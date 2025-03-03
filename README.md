@@ -2,17 +2,26 @@
 
 A Model Context Protocol (MCP) server implementation for the [SourceSync.ai](https://sourcesync.ai) API. This server allows AI models to interact with SourceSync.ai's knowledge management platform through a standardized interface.
 
-## Overview
+## Features
 
-This MCP server provides AI models with the ability to:
-
-- Manage namespaces for organizing data
+- Manage namespaces for organizing knowledge
 - Ingest content from various sources (text, URLs, websites, external services)
-- Manage documents within namespaces
-- Perform semantic and hybrid searches
+- Retrieve, update, and manage documents stored in your knowledge base
+- Perform semantic and hybrid searches against your knowledge base
+- Access document content directly from parsed text URLs
 - Manage connections to external services
+- Default configuration support for seamless AI integration
 
 ## Installation
+
+### Running with npx
+
+```bash
+# Install and run with your API key and tenant ID
+env SOURCESYNC_API_KEY=your_api_key npx -y sourcesyncai-mcp
+```
+
+### Manual Installation
 
 ```bash
 # Clone the repository
@@ -24,160 +33,123 @@ npm install
 
 # Build the project
 npm run build
+
+# Run the server
+node dist/index.js
 ```
+
+### Running on Cursor
+
+To configure SourceSync.ai MCP in Cursor:
+
+1. Open Cursor Settings
+1. Go to `Features > MCP Servers`
+1. Click `+ Add New MCP Server`
+1. Enter the following:
+   - Name: `sourcesyncai-mcp` (or your preferred name)
+   - Type: `command`
+   - Command: `env SOURCESYNCAI_API_KEY=your-api-key npx -y sourcesyncai-mcp`
+
+After adding, you can use SourceSync.ai tools with Cursor's AI features by describing your knowledge management needs.
+
+### Running on Windsurf
+
+Add this to your `./codeium/windsurf/model_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "sourcesyncai-mcp": {
+      "command": "npx",
+      "args": ["-y", "soucesyncai-mcp"],
+      "env": {
+        "SOURCESYNC_API_KEY": "your_api_key",
+        "SOURCESYNC_NAMESPACE_ID": "your_namespace_id",
+        "SOURCESYNC_TENANT_ID": "your_tenant_id"
+      }
+    }
+  }
+}
+```
+
+### Running on Claude Desktop
+
+To use this MCP server with Claude Desktop:
+
+1. Locate the Claude Desktop configuration file:
+
+   - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+   - **Linux**: `~/.config/Claude/claude_desktop_config.json`
+
+2. Edit the configuration file to add the SourceSync.ai MCP server:
+
+```json
+{
+  "mcpServers": {
+    "sourcesyncai-mcp": {
+      "command": "npx",
+      "args": ["-y", "sourcesyncai-mcp"],
+      "env": {
+        "SOURCESYNC_API_KEY": "your_api_key",
+        "SOURCESYNC_NAMESPACE_ID": "your_namespace_id",
+        "SOURCESYNC_TENANT_ID": "your_tenant_id"
+      }
+    }
+  }
+}
+```
+
+3. Save the configuration file and restart Claude Desktop
 
 ## Configuration
 
-The server can be configured using environment variables. Create a `.env` file in the root directory with the following variables:
+### Environment Variables
 
-```
-# Server Configuration
-PORT=3000                      # Port for HTTP server (if needed)
-LOG_LEVEL=info                 # Logging level (debug, info, warn, error)
+#### Required
 
-# SourceSync.ai Configuration
-SOURCESYNC_API_URL=https://api.sourcesync.ai  # API URL (default)
-SOURCESYNC_DEFAULT_API_KEY=                   # Default API key (optional)
-SOURCESYNC_DEFAULT_ORG_ID=                    # Default organization ID (required)
-SOURCESYNC_DEFAULT_NAMESPACE_ID=              # Default namespace ID (optional)
+- `SOURCESYNC_API_KEY`: Your SourceSync.ai API key (required)
 
-# Rate Limiting
-RATE_LIMIT_MAX=100             # Maximum number of requests per window
-RATE_LIMIT_WINDOW_MS=60000     # Time window in milliseconds (1 minute)
+#### Optional
 
-# Timeout Configuration
-REQUEST_TIMEOUT_MS=30000       # API request timeout in milliseconds
-```
+- `SOURCESYNC_NAMESPACE_ID`: Default namespace ID to use for operations
+- `SOURCESYNC_TENANT_ID`: Your tenant ID (required)
 
-You can also set these variables in your environment or pass them when starting the server:
+### Configuration Examples
+
+Basic configuration with default values:
 
 ```bash
-SOURCESYNC_DEFAULT_API_KEY=your_api_key SOURCESYNC_DEFAULT_ORG_ID=your_org_id SOURCESYNC_DEFAULT_NAMESPACE_ID=your_namespace_id node build/index.js
+export SOURCESYNC_API_KEY=your_api_key
+export SOURCESYNC_TENANT_ID=your_tenant_id
+export SOURCESYNC_NAMESPACE_ID=your_namespace_id
 ```
 
-### Default Values
+## Available Tools
 
-Setting default values for API key, organization ID, and namespace ID makes it easier to use the MCP server with AI assistants like Claude Desktop. When these defaults are set, users don't need to specify these values in every request.
+### Authentication
 
-**Note:** Users are assumed to be part of a single organization, so the organization ID is set via the `SOURCESYNC_DEFAULT_ORG_ID` environment variable and is not required in individual requests.
-
-#### Example with Default Values
-
-When you have set default values in your environment variables:
-
-```bash
-# In your .env file
-SOURCESYNC_DEFAULT_API_KEY=your_api_key
-SOURCESYNC_DEFAULT_ORG_ID=your_org_id
-SOURCESYNC_DEFAULT_NAMESPACE_ID=your_namespace_id
-```
-
-AI models can make simpler requests:
-
-```json
-// Without default values
-{
-  "name": "semantic_search",
-  "arguments": {
-    "apiKey": "your_api_key",
-    "namespaceId": "your_namespace_id",
-    "query": "example document",
-    "topK": 5
-  }
-}
-
-// With default values
-{
-  "name": "semantic_search",
-  "arguments": {
-    "query": "example document",
-    "topK": 5
-  }
-}
-```
-
-This significantly improves the user experience when working with AI assistants, as they don't need to repeatedly ask for or include these values in every request.
-
-## Usage
-
-### Running the Server
-
-You can run the server using one of the following commands:
-
-```bash
-# Using npm scripts
-npm run start    # Run the server
-npm run dev      # Build and run the server
-
-# Or directly
-node build/index.js
-```
-
-The server runs on stdio, making it compatible with MCP clients that communicate through standard input/output.
-
-### Available Tools
-
-The server exposes the following tools to AI models:
-
-#### Authentication
 - `validate_api_key`: Validate a SourceSync.ai API key
 
-#### Namespaces
+```json
+{
+  "name": "validate_api_key",
+  "arguments": {}
+}
+```
+
+### Namespaces
+
 - `create_namespace`: Create a new namespace
 - `list_namespaces`: List all namespaces
 - `get_namespace`: Get details of a specific namespace
 - `update_namespace`: Update a namespace
 - `delete_namespace`: Delete a namespace
 
-#### Data Ingestion
-- `ingest_text`: Ingest text content
-- `ingest_urls`: Ingest content from URLs
-- `ingest_sitemap`: Ingest content from a sitemap
-- `ingest_website`: Ingest content from a website
-- `ingest_notion`: Ingest content from Notion
-- `ingest_google_drive`: Ingest content from Google Drive
-- `ingest_dropbox`: Ingest content from Dropbox
-- `ingest_onedrive`: Ingest content from OneDrive
-- `ingest_box`: Ingest content from Box
-- `get_ingest_job_run_status`: Get the status of an ingestion job run
-
-#### Documents
-- `fetch_documents`: Fetch documents with optional filters
-- `update_documents`: Update documents
-- `delete_documents`: Delete documents
-- `resync_documents`: Resync documents
-
-#### Search
-- `semantic_search`: Perform semantic search
-- `hybrid_search`: Perform hybrid search (semantic + keyword)
-
-#### Connections
-- `create_connection`: Create a new connection to an external service
-- `list_connections`: List all connections
-- `get_connection`: Get details of a specific connection
-- `update_connection`: Update a connection
-- `revoke_connection`: Revoke a connection
-
-## Example Usage
-
-Here's an example of how an AI model might use these tools:
-
-1. Validate an API key:
-```json
-{
-  "name": "validate_api_key",
-  "arguments": {
-    "apiKey": "your_api_key"
-  }
-}
-```
-
-2. Create a namespace:
 ```json
 {
   "name": "create_namespace",
   "arguments": {
-    "apiKey": "your_api_key",
     "name": "my-namespace",
     "fileStorageConfig": {
       "provider": "S3_COMPATIBLE",
@@ -203,17 +175,69 @@ Here's an example of how an AI model might use these tools:
         "apiKey": "your_openai_api_key",
         "model": "text-embedding-3-small"
       }
-    }
+    },
+    "tenantId": "tenant_XXX"
   }
 }
 ```
 
-3. Ingest text:
+```json
+{
+  "name": "list_namespaces",
+  "arguments": {
+    "tenantId": "tenant_XXX"
+  }
+}
+```
+
+```json
+{
+  "name": "get_namespace",
+  "arguments": {
+    "namespaceId": "namespace_XXX",
+    "tenantId": "tenant_XXX"
+  }
+}
+```
+
+```json
+{
+  "name": "update_namespace",
+  "arguments": {
+    "namespaceId": "namespace_XXX",
+    "tenantId": "tenant_XXX",
+    "name": "updated-namespace-name"
+  }
+}
+```
+
+```json
+{
+  "name": "delete_namespace",
+  "arguments": {
+    "namespaceId": "namespace_XXX",
+    "tenantId": "tenant_XXX"
+  }
+}
+```
+
+### Data Ingestion
+
+- `ingest_text`: Ingest text content
+- `ingest_urls`: Ingest content from URLs
+- `ingest_sitemap`: Ingest content from a sitemap
+- `ingest_website`: Ingest content from a website
+- `ingest_notion`: Ingest content from Notion
+- `ingest_google_drive`: Ingest content from Google Drive
+- `ingest_dropbox`: Ingest content from Dropbox
+- `ingest_onedrive`: Ingest content from OneDrive
+- `ingest_box`: Ingest content from Box
+- `get_ingest_job_run_status`: Get the status of an ingestion job run
+
 ```json
 {
   "name": "ingest_text",
   "arguments": {
-    "apiKey": "your_api_key",
     "namespaceId": "your_namespace_id",
     "ingestConfig": {
       "source": "TEXT",
@@ -225,67 +249,368 @@ Here's an example of how an AI model might use these tools:
           "author": "AI Assistant"
         }
       }
+    },
+    "tenantId": "tenant_XXX"
+  }
+}
+```
+
+```json
+{
+  "name": "ingest_urls",
+  "arguments": {
+    "namespaceId": "your_namespace_id",
+    "ingestConfig": {
+      "source": "URLS",
+      "config": {
+        "urls": ["https://example.com/page1", "https://example.com/page2"],
+        "metadata": {
+          "source": "web",
+          "category": "documentation"
+        }
+      }
+    },
+    "tenantId": "tenant_XXX"
+  }
+}
+```
+
+```json
+{
+  "name": "ingest_sitemap",
+  "arguments": {
+    "namespaceId": "your_namespace_id",
+    "ingestConfig": {
+      "source": "SITEMAP",
+      "config": {
+        "url": "https://example.com/sitemap.xml",
+        "metadata": {
+          "source": "sitemap",
+          "website": "example.com"
+        }
+      }
+    },
+    "tenantId": "tenant_XXX"
+  }
+}
+```
+
+```json
+{
+  "name": "ingest_website",
+  "arguments": {
+    "namespaceId": "your_namespace_id",
+    "ingestConfig": {
+      "source": "WEBSITE",
+      "config": {
+        "url": "https://example.com",
+        "maxDepth": 3,
+        "maxPages": 100,
+        "metadata": {
+          "source": "website",
+          "domain": "example.com"
+        }
+      }
+    },
+    "tenantId": "tenant_XXX"
+  }
+}
+```
+
+```json
+{
+  "name": "ingest_notion",
+  "arguments": {
+    "namespaceId": "your_namespace_id",
+    "ingestConfig": {
+      "source": "NOTION",
+      "config": {
+        "connectionId": "your_notion_connection_id",
+        "metadata": {
+          "source": "notion",
+          "workspace": "My Workspace"
+        }
+      }
+    },
+    "tenantId": "your_tenant_id"
+  }
+}
+```
+
+```json
+{
+  "name": "ingest_google_drive",
+  "arguments": {
+    "namespaceId": "your_namespace_id",
+    "ingestConfig": {
+      "source": "GOOGLE_DRIVE",
+      "config": {
+        "connectionId": "connection_XXX",
+        "metadata": {
+          "source": "google_drive",
+          "owner": "user@example.com"
+        }
+      }
+    },
+    "tenantId": "tenant_XXX"
+  }
+}
+```
+
+```json
+{
+  "name": "ingest_dropbox",
+  "arguments": {
+    "namespaceId": "your_namespace_id",
+    "ingestConfig": {
+      "source": "DROPBOX",
+      "config": {
+        "connectionId": "connection_XXX",
+        "metadata": {
+          "source": "dropbox",
+          "account": "user@example.com"
+        }
+      }
+    },
+    "tenantId": "tenant_XXX"
+  }
+}
+```
+
+```json
+{
+  "name": "ingest_onedrive",
+  "arguments": {
+    "namespaceId": "your_namespace_id",
+    "ingestConfig": {
+      "source": "ONEDRIVE",
+      "config": {
+        "connectionId": "connection_XXX",
+        "metadata": {
+          "source": "onedrive",
+          "account": "user@example.com"
+        }
+      }
+    },
+    "tenantId": "tenant_XXX"
+  }
+}
+```
+
+```json
+{
+  "name": "ingest_box",
+  "arguments": {
+    "namespaceId": "your_namespace_id",
+    "ingestConfig": {
+      "source": "BOX",
+      "config": {
+        "connectionId": "connection_XXX",
+        "metadata": {
+          "source": "box",
+          "owner": "user@example.com"
+        }
+      }
+    },
+    "tenantId": "tenant_XXX"
+  }
+}
+```
+
+```json
+{
+  "name": "get_ingest_job_run_status",
+  "arguments": {
+    "namespaceId": "your_namespace_id",
+    "ingestJobRunId": "ingest_job_run_XXX",
+    "tenantId": "tenant_XXX"
+  }
+}
+```
+
+### Documents
+
+- `getDocuments`: Retrieve documents with optional filters
+- `updateDocuments`: Update document metadata
+- `deleteDocuments`: Delete documents
+- `resyncDocuments`: Resync documents
+- `fetchUrlContent`: Fetch text content from document URLs
+
+```json
+{
+  "name": "getDocuments",
+  "arguments": {
+    "namespaceId": "namespace_XXX",
+    "tenantId": "tenant_XXX",
+    "filterConfig": {
+      "documentTypes": ["PDF"]
+    },
+    "includeConfig": {
+      "parsedTextFileUrl": true
     }
   }
 }
 ```
 
-4. Perform a semantic search:
 ```json
 {
-  "name": "semantic_search",
+  "name": "updateDocuments",
   "arguments": {
-    "apiKey": "your_api_key",
-    "namespaceId": "your_namespace_id",
-    "query": "example document",
-    "topK": 5
+    "namespaceId": "namespace_XXX",
+    "tenantId": "tenant_XXX",
+    "documentIds": ["doc_XXX", "doc_YYY"],
+    "filterConfig": {
+      "documentIds": ["doc_XXX", "doc_YYY"]
+    },
+    "data": {
+      "metadata": {
+        "status": "reviewed",
+        "category": "technical"
+      }
+    }
   }
 }
 ```
 
-5. When chatting with Claude, you can now use SourceSync.ai tools by asking Claude to perform tasks like searching your knowledge base, ingesting content, or managing namespaces.
+```json
+{
+  "name": "deleteDocuments",
+  "arguments": {
+    "namespaceId": "namespace_XXX",
+    "tenantId": "tenant_XXX",
+    "documentIds": ["doc_XXX", "doc_YYY"],
+    "filterConfig": {
+      "documentIds": ["doc_XXX", "doc_YYY"]
+    }
+  }
+}
+```
 
-### Troubleshooting Claude Desktop Integration
+```json
+{
+  "name": "resyncDocuments",
+  "arguments": {
+    "namespaceId": "namespace_XXX",
+    "tenantId": "tenant_XXX",
+    "documentIds": ["doc_XXX", "doc_YYY"],
+    "filterConfig": {
+      "documentIds": ["doc_XXX", "doc_YYY"]
+    }
+  }
+}
+```
 
-If you encounter issues connecting the SourceSync.ai MCP server to Claude Desktop, try these troubleshooting steps:
+```json
+{
+  "name": "fetchUrlContent",
+  "arguments": {
+    "url": "https://api.sourcesync.ai/v1/documents/doc_XXX/content?format=text",
+    "apiKey": "your_api_key",
+    "tenantId": "tenant_XXX"
+  }
+}
+```
 
-1. **Verify Paths**: Ensure all paths in your configuration file are absolute paths, not relative. Double-check that the paths to your server's `index.js` file are correct.
+### Search
 
-2. **Check Permissions**: On Windows, try running Claude Desktop as an administrator. On macOS and Linux, ensure the server file has execution permissions (`chmod +x build/index.js`).
+- `semantic_search`: Perform semantic search
+- `hybrid_search`: Perform hybrid search (semantic + keyword)
 
-3. **Enable Developer Mode**: In Claude Desktop, go to Help > Enable Developer Mode. Then, in the Developer menu, open the MCP Log File to see detailed information about server connections.
+```json
+{
+  "name": "semantic_search",
+  "arguments": {
+    "namespaceId": "your_namespace_id",
+    "query": "example document",
+    "topK": 5,
+    "tenantId": "tenant_XXX"
+  }
+}
+```
 
-4. **Test the Server Directly**: Run the server directly from the command line to verify it works:
-   ```bash
-   node /path/to/sourcesyncai-mcp/build/index.js
-   ```
+```json
+{
+  "name": "hybrid_search",
+  "arguments": {
+    "namespaceId": "your_namespace_id",
+    "query": "example document",
+    "topK": 5,
+    "tenantId": "tenant_XXX",
+    "hybridConfig": {
+      "semanticWeight": 0.7,
+      "keywordWeight": 0.3
+    }
+  }
+}
+```
 
-5. **Restart Claude Desktop**: After making changes to the configuration file, completely close and restart Claude Desktop.
+### Connections
 
-6. **Environment Variables**: Make sure environment variables are correctly set in the configuration file. If you're using a `.env` file for your server, consider moving those variables to the `env` section in the Claude Desktop configuration.
+- `create_connection`: Create a new connection to an external service
+- `list_connections`: List all connections
+- `get_connection`: Get details of a specific connection
+- `update_connection`: Update a connection
+- `revoke_connection`: Revoke a connection
 
-### Cursor
+```json
+{
+  "name": "create_connection",
+  "arguments": {
+    "tenantId": "tenant_XXX",
+    "namespaceId": "namespace_XXX",
+    "name": "My Connection",
+    "connector": "GOOGLE_DRIVE",
+    "clientRedirectUrl": "https://your-app.com/callback"
+  }
+}
+```
 
-To use this MCP server with Cursor:
+```json
+{
+  "name": "list_connections",
+  "arguments": {
+    "tenantId": "tenant_XXX",
+    "namespaceId": "namespace_XXX"
+  }
+}
+```
 
-1. Open Cursor and go to Settings > AI > MCP Tools.
+```json
+{
+  "name": "get_connection",
+  "arguments": {
+    "tenantId": "tenant_XXX",
+    "namespaceId": "namespace_XXX",
+    "connectionId": "connection_XXX"
+  }
+}
+```
 
-2. Add a new MCP tool:
-   - **Name**: SourceSync.ai
-   - **Path**: `/path/to/sourcesyncai-mcp/build/index.js`
-   - **Arguments**: (leave empty)
-   - **Environment Variables**: Add your default values:
-     ```
-     SOURCESYNC_DEFAULT_API_KEY=your_api_key
-     SOURCESYNC_DEFAULT_ORG_ID=your_org_id
-     SOURCESYNC_DEFAULT_NAMESPACE_ID=your_namespace_id
-     ```
+```json
+{
+  "name": "update_connection",
+  "arguments": {
+    "tenantId": "tenant_XXX",
+    "namespaceId": "namespace_XXX",
+    "connectionId": "connection_XXX",
+    "name": "Updated Connection Name",
+    "clientRedirectUrl": "https://your-app.com/updated-callback"
+  }
+}
+```
 
-3. Save the configuration.
+```json
+{
+  "name": "revoke_connection",
+  "arguments": {
+    "tenantId": "tenant_XXX",
+    "namespaceId": "namespace_XXX",
+    "connectionId": "connection_XXX"
+  }
+}
+```
 
-4. When using Cursor's AI features, you can now leverage SourceSync.ai tools to search, ingest, and manage your knowledge base.
-
-### Example Prompts
+## Example Prompts
 
 Here are some example prompts you can use with Claude or Cursor after configuring the MCP server:
 
@@ -293,31 +618,50 @@ Here are some example prompts you can use with Claude or Cursor after configurin
 - "Ingest this article into my SourceSync knowledge base: [URL]"
 - "Create a new namespace in SourceSync for my project documentation."
 - "List all the documents in my SourceSync namespace."
+- "Get the text content of document [document_id] from my SourceSync namespace."
 
-The AI will use the configured MCP server to execute these operations, using the default values you've provided in the environment variables.
+## Troubleshooting
+
+### Connection Issues
+
+If you encounter issues connecting the SourceSync.ai MCP server:
+
+1. **Verify Paths**: Ensure all paths in your configuration are absolute paths, not relative.
+2. **Check Permissions**: Ensure the server file has execution permissions (`chmod +x dist/index.js`).
+3. **Enable Developer Mode**: In Claude Desktop, enable Developer Mode and check the MCP Log File.
+4. **Test the Server**: Run the server directly from the command line:
+
+   ```bash
+   node /path/to/sourcesyncai-mcp/dist/index.js
+   ```
+
+5. **Restart AI Client**: After making changes, completely restart Claude Desktop or Cursor.
+6. **Check Environment Variables**: Ensure all required environment variables are correctly set.
+
+### Debug Logging
+
+For detailed logging, add the DEBUG environment variable:
+
+```
+
+```
 
 ## Development
 
 ### Project Structure
 
 - `src/index.ts`: Main entry point and server setup
-- `src/authentication.ts`: Authentication-related functions
-- `src/namespaces.ts`: Namespace management functions
-- `src/ingestion.ts`: Data ingestion functions
-- `src/documents.ts`: Document management functions
-- `src/search.ts`: Search functions
-- `src/connections.ts`: External connection management functions
-- `src/utils.ts`: Utility functions and common schemas
+- `src/schemas.ts`: Schema definitions for all tools
+- `src/sourcesync.ts`: Client for interacting with SourceSync.ai API
+- `src/sourcesync.types.ts`: TypeScript type definitions
 
-### Building
+### Building and Testing
 
 ```bash
+# Build the project
 npm run build
-```
 
-### Testing
-
-```bash
+# Run tests
 npm test
 ```
 
@@ -327,184 +671,21 @@ MIT
 
 ## Links
 
-- [SourceSync.ai Documentation](https://sourcesync.ai/docs)
-- [SourceSync.ai API Reference](https://sourcesync.ai/api-reference)
-- [Model Context Protocol](https://github.com/modelcontextprotocol/mcp)
+- [SourceSync.ai Documentation](https://sourcesync.ai)
+- [SourceSync.ai API Reference](https://sourcesync.ai/api-reference/authentication)
+- [Model Context Protocol](https://modelcontextprotocol.io/introduction)
 
-## Integration with AI Clients
+Document content retrieval workflow:
 
-### Claude Desktop
-
-To use this MCP server with Claude Desktop:
-
-1. Start the MCP server:
-   ```bash
-   npm run start
-   ```
-
-2. Locate the Claude Desktop configuration file:
-   - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-   - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-   - **Linux**: `~/.config/Claude/claude_desktop_config.json`
-
-3. Edit the configuration file to add the SourceSync.ai MCP server:
-   ```json
-   {
-     "mcpServers": {
-       "sourcesyncai": {
-         "command": "node",
-         "args": ["/Users/yourusername/path/to/sourcesyncai-mcp/build/index.js"],
-         "env": {
-           "SOURCESYNC_DEFAULT_API_KEY": "your_api_key",
-           "SOURCESYNC_DEFAULT_NAMESPACE_ID": "your_namespace_id",
-           "SOURCESYNC_DEFAULT_ORG_ID": "your_org_id"
-         }
-       }
-     }
-   }
-   ```
-
-   Replace `/Users/yourusername/path/to/sourcesyncai-mcp` with the absolute path to your project directory. Make sure to use:
-   - Forward slashes (`/`) on macOS and Linux
-   - Double backslashes (`\\`) on Windows (e.g., `C:\\Users\\yourusername\\path\\to\\sourcesyncai-mcp`)
-
-   **Note:** The `SOURCESYNC_DEFAULT_ORG_ID` is required as users are assumed to be part of a single organization.
-
-4. Save the configuration file and completely restart Claude Desktop.
-
-5. When chatting with Claude, you can now use SourceSync.ai tools by asking Claude to perform tasks like searching your knowledge base, ingesting content, or managing namespaces.
-
-### Cursor
-
-To use this MCP server with Cursor:
-
-1. Open Cursor and go to Settings > AI > MCP Tools.
-
-2. Add a new MCP tool:
-   - **Name**: SourceSync.ai
-   - **Path**: `/path/to/sourcesyncai-mcp/build/index.js`
-   - **Arguments**: (leave empty)
-   - **Environment Variables**: Add your default values:
-     ```
-     SOURCESYNC_DEFAULT_API_KEY=your_api_key
-     SOURCESYNC_DEFAULT_ORG_ID=your_org_id
-     SOURCESYNC_DEFAULT_NAMESPACE_ID=your_namespace_id
-     ```
-
-3. Save the configuration.
-
-4. When using Cursor's AI features, you can now leverage SourceSync.ai tools to search, ingest, and manage your knowledge base.
-
-### Example Prompts
-
-Here are some example prompts you can use with Claude or Cursor after configuring the MCP server:
-
-- "Search my SourceSync knowledge base for information about machine learning."
-- "Ingest this article into my SourceSync knowledge base: [URL]"
-- "Create a new namespace in SourceSync for my project documentation."
-- "List all the documents in my SourceSync namespace."
-
-The AI will use the configured MCP server to execute these operations, using the default values you've provided in the environment variables.
-
-## Debugging Claude Desktop MCP Server Connection
-
-If your SourceSync.ai tools are not appearing in Claude Desktop, try these troubleshooting steps:
-
-### 1. Verify Claude Desktop Configuration
-
-Double-check your `claude_desktop_config.json` file:
+1. First, use `getDocuments` with `includeConfig.parsedTextFileUrl: true` to get documents with their content URLs
+2. Extract the URL from the document response
+3. Use `fetchUrlContent` to retrieve the actual content:
 
 ```json
 {
-  "mcpServers": {
-    "sourcesyncai": {
-      "command": "node",
-      "args": ["/absolute/path/to/sourcesyncai-mcp/build/index.js"],
-      "env": {
-        "SOURCESYNC_DEFAULT_API_KEY": "your_api_key",
-        "SOURCESYNC_DEFAULT_NAMESPACE_ID": "your_namespace_id",
-        "SOURCESYNC_DEFAULT_ORG_ID": "your_org_id",
-        "DEBUG": "mcp:*"
-      }
-    }
+  "name": "fetchUrlContent",
+  "arguments": {
+    "url": "https://example.com"
   }
 }
 ```
-
-Key points:
-- Ensure the path is absolute and correct for your system
-- Add the `DEBUG` environment variable to enable detailed logging
-
-### 2. Check MCP Server Logs
-
-Enable Developer Mode in Claude Desktop to access the MCP Log File:
-1. Click on your profile picture in Claude Desktop
-2. Go to Settings
-3. Enable Developer Mode
-4. Access the MCP Log File from the Developer menu
-
-Look for any error messages related to tool registration or server connection.
-
-### 3. Test the Server Directly
-
-Run the server directly from the command line to check for any startup errors:
-
-```bash
-node /path/to/sourcesyncai-mcp/build/index.js
-```
-
-### 4. Verify Tool Registration
-
-The MCP SDK should handle Zod schemas directly without requiring conversion to JSON Schema. If you're still having issues, you can try adding debug logging to your `index.ts` file:
-
-```typescript
-// Add at the top of your file
-import util from 'util';
-
-// Then before registering each tool
-console.error(`Registering tool with schema: ${util.inspect(YourSchema.shape, { depth: null })}`);
-```
-
-### 5. Restart Claude Desktop
-
-After making any changes to the configuration or server code, completely restart Claude Desktop (not just closing the window, but quitting the application entirely).
-
-### 6. Check for Schema Compatibility Issues
-
-If you're still having issues with tools not appearing, try these additional steps:
-
-1. **Use Simple Schema Format**: For testing, try registering a tool with a simple schema format:
-   ```typescript
-   server.tool(
-     "test_tool",
-     "A simple test tool to verify MCP server connection.",
-     { message: z.string() },
-     async (params) => {
-       return {
-         content: [{ type: "text", text: `Test tool received: ${params.message}` }]
-       };
-     }
-   );
-   ```
-
-2. **Check Schema Format**: The MCP SDK expects schemas in a specific format. Make sure your Zod schemas are properly structured.
-
-3. **Verify MCP SDK Version**: Ensure you're using a compatible version of the MCP SDK. The current code uses version 1.6.1.
-
-4. **Check for Circular References**: Ensure your Zod schemas don't contain circular references, which can cause issues with serialization.
-
-5. **Inspect Network Traffic**: If you're using the HTTP transport, you can inspect the network traffic to see if the tools are being properly registered.
-
-### 7. Common Error Patterns
-
-Here are some common error patterns and their solutions:
-
-1. **Path Issues**: Absolute paths in the configuration file must be correct for your system. Double-check the path to the MCP server executable.
-
-2. **Environment Variables**: Make sure all required environment variables are set correctly in the configuration file.
-
-3. **Server Not Starting**: If the server fails to start, check the logs for any error messages.
-
-4. **Schema Validation Errors**: If the schema validation fails, the tool won't be registered. Check the schema format.
-
-5. **Transport Issues**: If the transport fails to connect, the tools won't be available. Check the transport configuration.
