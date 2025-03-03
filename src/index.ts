@@ -348,74 +348,10 @@ server.tool(
   },
 )
 
-// Register document tools
+// Add document management tools
 server.tool(
   'fetchDocuments',
   'Fetches documents from the namespace based on filter criteria. Supports pagination and including specific document properties.',
-  FetchDocumentsSchema.shape,
-  async (params: any) => {
-    return safeApiCall(async () => {
-      const {
-        namespaceId,
-        documentIds,
-        pagination,
-        tenantId,
-        filterConfig,
-        includeConfig,
-      } = params
-
-      // Create a client with the provided parameters
-      const client = createClient({ namespaceId, tenantId })
-
-      // Create a proper filter config if not provided
-      const finalFilterConfig = filterConfig || {}
-
-      // Add documentIds to filter if provided and not already in filter
-      if (
-        documentIds &&
-        documentIds.length > 0 &&
-        !finalFilterConfig.documentIds
-      ) {
-        finalFilterConfig.documentIds = documentIds
-      }
-
-      // Call the getDocuments method with properly structured parameters
-      return await client.getDocuments({
-        filterConfig: {
-          ...finalFilterConfig,
-          // Convert string enum values to their SourceSync enum equivalents
-          documentTypes: finalFilterConfig.documentTypes?.map(
-            (type: string) =>
-              SourceSyncDocumentType[
-                type as keyof typeof SourceSyncDocumentType
-              ],
-          ),
-          documentIngestionSources:
-            finalFilterConfig.documentIngestionSources?.map(
-              (source: string) =>
-                SourceSyncIngestionSource[
-                  source as keyof typeof SourceSyncIngestionSource
-                ],
-            ),
-          documentIngestionStatuses:
-            finalFilterConfig.documentIngestionStatuses?.map(
-              (status: string) =>
-                SourceSyncIngestionStatus[
-                  status as keyof typeof SourceSyncIngestionStatus
-                ],
-            ),
-        },
-        pagination,
-        includeConfig: includeConfig || { documents: true },
-      })
-    })
-  },
-)
-
-// Add document management tools
-server.tool(
-  'getDocuments',
-  'Retrieves documents from the namespace based on filter criteria. Similar to fetchDocuments but with a more direct interface.',
   FetchDocumentsSchema.shape,
   async (params) => {
     return safeApiCall(async () => {
