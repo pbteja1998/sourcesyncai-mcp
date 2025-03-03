@@ -123,7 +123,7 @@ To use this MCP server with Claude Desktop:
 #### Optional
 
 - `SOURCESYNC_NAMESPACE_ID`: Default namespace ID to use for operations
-- `SOURCESYNC_TENANT_ID`: Your tenant ID (required)
+- `SOURCESYNC_TENANT_ID`: Your tenant ID (optional)
 
 ### Configuration Examples
 

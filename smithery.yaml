@@ -7,17 +7,16 @@ startCommand:
     type: object
     required:
       - sourcesyncApiKey
-      - sourcesyncTenantId
     properties:
       sourcesyncApiKey:
         type: string
         description: Your SourceSync.ai API key
-      sourcesyncTenantId:
-        type: string
-        description: Your SourceSync.ai tenant ID
       sourcesyncNamespaceId:
         type: string
         description: Optional SourceSync.ai namespace ID
+      sourcesyncTenantId:
+        type: string
+        description: Optional Your SourceSync.ai tenant ID
   commandFunction:
     # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
     |-
