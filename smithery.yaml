@@ -1,0 +1,28 @@
+# Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
+
+startCommand:
+  type: stdio
+  configSchema:
+    # JSON Schema defining the configuration options for the MCP.
+    type: object
+    required:
+      - sourcesyncApiKey
+      - sourcesyncTenantId
+    properties:
+      sourcesyncApiKey:
+        type: string
+        description: Your SourceSync.ai API key
+      sourcesyncTenantId:
+        type: string
+        description: Your SourceSync.ai tenant ID
+      sourcesyncNamespaceId:
+        type: string
+        description: Optional SourceSync.ai namespace ID
+  commandFunction:
+    # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
+    |-
+    (config) => { const envParts = [`SOURCESYNC_API_KEY=${config.sourcesyncApiKey}`, `SOURCESYNC_TENANT_ID=${config.sourcesyncTenantId}`]; if(config.sourcesyncNamespaceId) { envParts.push(`SOURCESYNC_NAMESPACE_ID=${config.sourcesyncNamespaceId}`); } return { command: 'node', args: ['dist/index.js'], env: Object.assign({}, ...envParts.map(pair => { const [key, value] = pair.split('='); return { [key]: value }; })) }; }
+  exampleConfig:
+    sourcesyncApiKey: dummy_api_key
+    sourcesyncTenantId: dummy_tenant_id
+    sourcesyncNamespaceId: dummy_namespace_id
